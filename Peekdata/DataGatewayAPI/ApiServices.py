@@ -84,7 +84,6 @@ class ApiClient:
             print("ERROR:\n  ", e)
         exit(1)
 
-
     def GetCSV(self, request, filename):
         """
         method to get file
