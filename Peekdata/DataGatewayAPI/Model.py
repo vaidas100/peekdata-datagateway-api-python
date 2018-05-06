@@ -1,6 +1,7 @@
 from enum import Enum
 import datetime
 import json
+import re
 import uuid
 
 __author__ = 'Vaidotas Senkus'
@@ -38,6 +39,55 @@ class serialize_to_json_encoder(json.JSONEncoder):
             return o.__dict__
         except:
             pass
+
+
+def string_to_datetime(string):
+    """
+    method to convert string to datetime object
+
+    >>> string_to_datetime('1976-05-18T23:59:00').isoformat()
+    '1976-05-18T23:59:00'
+    >>> string_to_datetime('19760518T235900+0500').isoformat()
+    '1976-05-18T23:59:00+05:00'
+    >>> string_to_datetime('19760518T235900Z').isoformat()
+    '1976-05-18T23:59:00'
+    >>> string_to_datetime('1976-05-18T23:59:00').isoformat()
+    '1976-05-18T23:59:00'
+    >>> string_to_datetime('19760518T235900').isoformat()
+    '1976-05-18T23:59:00'
+    >>> string_to_datetime('1976-05-18').isoformat()
+    '1976-05-18T00:00:00'
+    >>> string_to_datetime('19760518').isoformat()
+    '1976-05-18T00:00:00'
+    """
+
+    datetime_formats = {
+        # datetime example           format
+        '1976-05-18T23:59:00+05:00': '%Y-%m-%dT%H:%M:%S',
+        '19760518T235900+0500':      '%Y%m%dT%H%M%S%z',
+        '19760518T235900Z':          '%Y%m%dT%H%M%SZ',
+        '1976-05-18T23:59:00':       '%Y-%m-%dT%H:%M:%S',
+        '19760518T235900':           '%Y%m%dT%H%M%S',
+        '1976-05-18':                '%Y-%m-%d',
+        '19760518':                  '%Y%m%d',
+    }
+
+    m = re.match(r'^(\d{4})-?(\d{2})-?(\d{2})', string)
+    if m:
+        if int(m.group(1)) in range(1970, datetime.datetime.now().year + 1):
+            if int(m.group(2)) in range(1, 13):
+                if int(m.group(3)) in range(1, 32):
+
+                    for datetime_format in datetime_formats.values():
+                        try:
+                            return datetime.datetime.strptime(string, datetime_format)
+                        except:
+                            pass
+
+    raise ValueError(
+        "\n  Unsupported datetime format.\n  Please use:\n    %s"
+        % "\n    ".join(datetime_formats.keys())
+    )
 
 
 class TypedList(list):
