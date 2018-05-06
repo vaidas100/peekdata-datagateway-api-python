@@ -1,3 +1,7 @@
+"""
+Examples how Requests can be formed
+"""
+
 from Peekdata.DataGatewayAPI.Model import *
 
 __author__ = 'Vaidotas Senkus'
@@ -5,6 +9,10 @@ __email__ = 'vaidas100@gmail.com'
 
 
 def getTwoDimensionsTwoMetricsFilterAndSorting():
+
+    """
+    Example of Request containing 2 Dimensions, 2 Metrics, 1 Filter and 1 Sorting option
+    """
 
     request = GetDataRequest()
 
@@ -46,6 +54,10 @@ def getTwoDimensionsTwoMetricsFilterAndSorting():
 
 
 def getTwoMetricsAndTwoFilterFromSpecifiedGraph():
+
+    """
+    Example of Request containing 2 Metrics, 2 Filters from Specified Graph (Data Source)
+    """
 
     request = GetDataRequest()
 
