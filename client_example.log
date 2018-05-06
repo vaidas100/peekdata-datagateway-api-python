@@ -1,0 +1,169 @@
+Peekdata Data API Gateway examples:
+
+Healthcheck ok (99.91ms).
+
+Request serialized to JSON:
+----------------------------------------
+{
+    "dimensions": [
+        "propertyCityID",
+        "currency"
+    ],
+    "filters": {
+        "singleKeys": [
+            {
+                "key": "currency",
+                "operation": "EQUALS",
+                "values": [
+                    "EUR"
+                ]
+            }
+        ]
+    },
+    "metrics": [
+        {
+            "metric": "loanamount"
+        },
+        {
+            "metric": "totalincome"
+        }
+    ],
+    "scopeName": "Mortgage-Lending",
+    "sortings": {
+        "dimensions": [
+            {
+                "dimension": "currency",
+                "direction": "ASC"
+            }
+        ]
+    }
+}
+----------------------------------------
+
+Got SELECT statement in (94.33ms):
+----------------------------------------
+SELECT -- rqid=7e059442-5b2f-4fbc-8373-b138ad89870c 
+		loan_data.propertycityid AS propertycityid_1,
+	loan_data.currency AS currency_2,
+	SUM(loan_data.loanamount) AS loanamount_3,
+	SUM(loan_data.totalincome) AS totalincome_4
+FROM loans.loan_data AS loan_data
+WHERE
+	loan_data.currency = 'EUR'
+GROUP BY loan_data.propertycityid, loan_data.currency
+ORDER BY currency_2, propertycityid_1
+----------------------------------------
+
+Got DATA (125.45ms):
+----------------------------------------
+{
+    "reportData": {
+        "columnHeaders": [
+            "propertycityid",
+            "currency",
+            "loanamount",
+            "totalincome"
+        ],
+        "rows": [
+            [
+                1,
+                "EUR",
+                25468400.0,
+                4583399.99
+            ],
+            [
+                2,
+                "EUR",
+                33567200.0,
+                5573906.02
+            ],
+            [
+                3,
+                "EUR",
+                43262800.0,
+                5826468.15
+            ],
+            [
+                4,
+                "EUR",
+                50281600.0,
+                4031426.95
+            ],
+            [
+                5,
+                "EUR",
+                56073700.0,
+                4217244.41
+            ],
+            [
+                6,
+                "EUR",
+                67532900.0,
+                4011258.44
+            ],
+            [
+                7,
+                "EUR",
+                24393400.0,
+                1219248.05
+            ],
+            [
+                10,
+                "EUR",
+                60400.0,
+                11406.88
+            ],
+            [
+                11,
+                "EUR",
+                696300.0,
+                130239.82
+            ],
+            [
+                12,
+                "EUR",
+                780400.0,
+                138596.32
+            ],
+            [
+                13,
+                "EUR",
+                947000.0,
+                110079.83
+            ],
+            [
+                14,
+                "EUR",
+                789500.0,
+                66086.07
+            ],
+            [
+                15,
+                "EUR",
+                1326500.0,
+                103756.79
+            ],
+            [
+                16,
+                "EUR",
+                1623800.0,
+                100041.62
+            ],
+            [
+                17,
+                "EUR",
+                342600.0,
+                20960.37
+            ]
+        ]
+    },
+    "requestID": "8de42b49-b9c8-4442-be35-c6083f50c5a1"
+}
+----------------------------------------
+
+DATA stored to file (108.02ms):
+----------------------------------------
+client_example_output.csv
+----------------------------------------
+
+END
