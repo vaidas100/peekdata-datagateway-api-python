@@ -1,3 +1,7 @@
+"""
+Examples how to use Peekdata DataGateway API
+"""
+
 from Peekdata.DataGatewayAPI.Model import *
 import requests
 import os
@@ -14,6 +18,9 @@ class ApiClient:
     CONST_API_METHOD_GETCSV = "/datagateway/v1/select/file"
 
     def __init__(self, url: str, port: int, scheme: str):
+        """
+        default constructor
+        """
         self.BaseAddress = "{scheme}://{url}:{port}".format(
             url=url,
             port=port,
@@ -86,7 +93,7 @@ class ApiClient:
 
     def GetCSV(self, request, filename):
         """
-        method to get file
+        method to get CSV file
         """
         json_request = serialize_to_json(request)
         try:
