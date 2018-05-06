@@ -8,6 +8,9 @@ __email__ = 'vaidas100@gmail.com'
 
 
 def serialize_to_json(data):
+    """
+    method to serialize Python object to JSON
+    """
     serialized = json.dumps(
         data,
         cls=serialize_to_json_encoder,
@@ -19,13 +22,17 @@ def serialize_to_json(data):
 
 
 class serialize_to_json_encoder(json.JSONEncoder):
+    """
+    json.JSONEncoder extension for
+    unsupported object types
+    """
     def default(self, o):
 
         if isinstance(o, datetime.datetime):
             return o.replace(microsecond=0).isoformat()
 
         if isinstance(o, Enum):
-            return o._name_
+            return o.name
 
         try:
             return o.__dict__
@@ -34,6 +41,9 @@ class serialize_to_json_encoder(json.JSONEncoder):
 
 
 class TypedList(list):
+    """
+    Python's list with elements of particular type
+    """
     def __init__(self, type):
         super().__init__()
         self.type = type
@@ -161,9 +171,9 @@ class DateRangeFilterDto:
             self.from_ = args[0]
             self.to = args[1]
         elif len(args) == 3:
-            self.key = args[0]
+            self.key =   args[0]
             self.from_ = args[1]
-            self.to = args[2]
+            self.to =    args[2]
         else:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
 
@@ -448,8 +458,8 @@ class GetDataResponse:
         if len(args) == 1:
             self.requestID = args[0]
         elif len(args) == 3:
-            self.requestID = args[0]
+            self.requestID =  args[0]
             self.reportData = args[1]
-            self.totalRows = args[2]
+            self.totalRows =  args[2]
         else:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
