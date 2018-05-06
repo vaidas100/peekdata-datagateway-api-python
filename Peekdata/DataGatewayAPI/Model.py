@@ -198,16 +198,16 @@ class DateRangeFilterDto:
     """
     >>> DateRangeFilterDto().key
     ''
-    >>> DateRangeFilterDto('from', 'to').from_
-    'from'
-    >>> DateRangeFilterDto('from', 'to').to
-    'to'
-    >>> DateRangeFilterDto('key', 'from', 'to').key
+    >>> DateRangeFilterDto('19760518', '19760519').from_
+    datetime.datetime(1976, 5, 18, 0, 0)
+    >>> DateRangeFilterDto('19760518', '19760519').to
+    datetime.datetime(1976, 5, 19, 0, 0)
+    >>> DateRangeFilterDto('key', '19760518', '19760519').key
     'key'
-    >>> DateRangeFilterDto('key', 'from', 'to').from_
-    'from'
-    >>> DateRangeFilterDto('key', 'from', 'to').to
-    'to'
+    >>> DateRangeFilterDto('key', '19760518', '19760519').from_
+    datetime.datetime(1976, 5, 18, 0, 0)
+    >>> DateRangeFilterDto('key', '19760518', '19760519').to
+    datetime.datetime(1976, 5, 19, 0, 0)
     """
 
     key = ''
@@ -218,12 +218,12 @@ class DateRangeFilterDto:
         if len(args) == 0:
             pass
         elif len(args) == 2:
-            self.from_ = args[0]
-            self.to = args[1]
+            self.from_ = string_to_datetime(args[0])
+            self.to =    string_to_datetime(args[1])
         elif len(args) == 3:
             self.key =   args[0]
-            self.from_ = args[1]
-            self.to =    args[2]
+            self.from_ = string_to_datetime(args[1])
+            self.to =    string_to_datetime(args[2])
         else:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
 
@@ -406,8 +406,8 @@ class SingleKeyFilterDto:
 # }
 class FilterDto:
     """
-    >>> f = FilterDto(); f.dateRanges.append(DateRangeFilterDto('f','t')); f.dateRanges[0].to
-    't'
+    >>> f = FilterDto(); f.dateRanges.append(DateRangeFilterDto('19760518','19760519')); f.dateRanges[0].to
+    datetime.datetime(1976, 5, 19, 0, 0)
     """
 
     dateRanges = TypedList(type(DateRangeFilterDto()))
