@@ -1,5 +1,8 @@
 """
-Examples how to use Peekdata DataGateway API
+Class contains main methods to be used with Peekdata DataGateway API.
+
+Public and available for testing server:
+http://demo.peekdata.io:8080
 """
 
 from Peekdata.DataGatewayAPI.Model import *
@@ -22,9 +25,9 @@ class ApiClient:
         default constructor
         """
         self.BaseAddress = "{scheme}://{url}:{port}".format(
+            scheme=scheme,
             url=url,
             port=port,
-            scheme=scheme,
         )
 
     def healthCheck(self):
