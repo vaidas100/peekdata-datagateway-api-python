@@ -1,5 +1,5 @@
 """
-Model for Peekdata DataGateway API Requests
+Data Model for Peekdata DataGateway API Requests
 """
 
 from enum import Enum
@@ -22,6 +22,9 @@ def serialize_to_json(data):
         indent=4,
         sort_keys=True,
     )
+    serialized = serialized.replace('"date_from":', '"from":')
+    serialized = serialized.replace('"date_to":', '"to":')
+
     return serialized
 
 
@@ -32,8 +35,8 @@ class ExtendedJsonEncoder(json.JSONEncoder):
     """
     def default(self, o):
 
-        if isinstance(o, datetime.datetime):
-            return o.replace(microsecond=0).isoformat()
+        if isinstance(o, datetime.date):
+            return o.isoformat()
 
         if isinstance(o, Enum):
             return o.name
@@ -44,32 +47,20 @@ class ExtendedJsonEncoder(json.JSONEncoder):
             pass
 
 
-def string_to_datetime(string):
+def string_to_date(string):
     """
     method to convert string to datetime object
 
-    >>> string_to_datetime('19760518T235900+0500').isoformat()
-    '1976-05-18T23:59:00+05:00'
-    >>> string_to_datetime('19760518T235900Z').isoformat()
-    '1976-05-18T23:59:00'
-    >>> string_to_datetime('1976-05-18T23:59:00').isoformat()
-    '1976-05-18T23:59:00'
-    >>> string_to_datetime('19760518T235900').isoformat()
-    '1976-05-18T23:59:00'
-    >>> string_to_datetime('1976-05-18').isoformat()
-    '1976-05-18T00:00:00'
-    >>> string_to_datetime('19760518').isoformat()
-    '1976-05-18T00:00:00'
+    >>> string_to_date('1976-05-18')
+    datetime.date(1976, 5, 18)
+    >>> string_to_date('19760518')
+    datetime.date(1976, 5, 18)
     """
 
     datetime_formats = {
-        # datetime example       format
-        '19760518T235900+0500':  '%Y%m%dT%H%M%S%z',
-        '19760518T235900Z':      '%Y%m%dT%H%M%SZ',
-        '1976-05-18T23:59:00':   '%Y-%m-%dT%H:%M:%S',
-        '19760518T235900':       '%Y%m%dT%H%M%S',
-        '1976-05-18':            '%Y-%m-%d',
-        '19760518':              '%Y%m%d',
+        # datetime example  format
+        '1976-05-18':       '%Y-%m-%d',
+        '19760518':         '%Y%m%d',
     }
 
     m = re.match(r'^(\d{4})-?(\d{2})-?(\d{2})', string)
@@ -80,7 +71,8 @@ def string_to_datetime(string):
 
                     for datetime_format in datetime_formats.values():
                         try:
-                            return datetime.datetime.strptime(string, datetime_format)
+                            dt = datetime.datetime.strptime(string, datetime_format)
+                            return dt.date()
                         except:
                             pass
 
@@ -162,32 +154,32 @@ class DateRangeFilterDto:
     DateRangeFilterDto(String from, String to)
     DateRangeFilterDto(String key, String from, String to)
 
-    >>> DateRangeFilterDto('19760518', '19760519').datetime_from
-    datetime.datetime(1976, 5, 18, 0, 0)
-    >>> DateRangeFilterDto('19760518', '19760519').datetime_to
-    datetime.datetime(1976, 5, 19, 0, 0)
+    >>> DateRangeFilterDto('19760518', '19760519').date_from
+    datetime.date(1976, 5, 18)
+    >>> DateRangeFilterDto('19760518', '19760519').date_to
+    datetime.date(1976, 5, 19)
     >>> DateRangeFilterDto('key', '19760518', '19760519').key
     'key'
-    >>> DateRangeFilterDto('key', '19760518', '19760519').datetime_from
-    datetime.datetime(1976, 5, 18, 0, 0)
-    >>> DateRangeFilterDto('key', '19760518', '19760519').datetime_to
-    datetime.datetime(1976, 5, 19, 0, 0)
+    >>> DateRangeFilterDto('key', '19760518', '19760519').date_from
+    datetime.date(1976, 5, 18)
+    >>> DateRangeFilterDto('key', '19760518', '19760519').date_to
+    datetime.date(1976, 5, 19)
     """
 
     key = ''
-    datetime_from = ''
-    datetime_to = ''
+    date_from = ''
+    date_to = ''
 
     def __init__(self, *args):
         if len(args) == 0:
             pass
         elif len(args) == 2:
-            self.datetime_from = string_to_datetime(args[0])
-            self.datetime_to   = string_to_datetime(args[1])
+            self.date_from = string_to_date(args[0])
+            self.date_to   = string_to_date(args[1])
         elif len(args) == 3:
             self.key =   args[0]
-            self.datetime_from = string_to_datetime(args[1])
-            self.datetime_to   = string_to_datetime(args[2])
+            self.date_from = string_to_date(args[1])
+            self.date_to   = string_to_date(args[2])
         else:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
 
@@ -312,8 +304,8 @@ class FilterDto:
     """
     FilterDto()
 
-    >>> f = FilterDto(); f.dateRanges.append(DateRangeFilterDto('19760518','19760519')); f.dateRanges[0].datetime_to
-    datetime.datetime(1976, 5, 19, 0, 0)
+    >>> f = FilterDto(); f.dateRanges.append(DateRangeFilterDto('19760518','19760519')); f.dateRanges[0].date_to
+    datetime.date(1976, 5, 19)
     """
 
     dateRanges = TypedList(type(DateRangeFilterDto()))
