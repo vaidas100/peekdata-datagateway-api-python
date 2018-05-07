@@ -1,3 +1,7 @@
+"""
+Model for Peekdata DataGateway API Requests
+"""
+
 from enum import Enum
 import datetime
 import json
@@ -14,18 +18,17 @@ def serialize_to_json(data):
     """
     serialized = json.dumps(
         data,
-        cls=serialize_to_json_encoder,
+        cls=ExtendedJsonEncoder,
         indent=4,
         sort_keys=True,
     )
-    serialized = serialized.replace('"from_":', '"from":')
     return serialized
 
 
-class serialize_to_json_encoder(json.JSONEncoder):
+class ExtendedJsonEncoder(json.JSONEncoder):
     """
-    json.JSONEncoder extension for
-    unsupported object types
+    json.JSONEncoder extension
+    for by default unsupported object types
     """
     def default(self, o):
 
@@ -45,8 +48,6 @@ def string_to_datetime(string):
     """
     method to convert string to datetime object
 
-    >>> string_to_datetime('1976-05-18T23:59:00').isoformat()
-    '1976-05-18T23:59:00'
     >>> string_to_datetime('19760518T235900+0500').isoformat()
     '1976-05-18T23:59:00+05:00'
     >>> string_to_datetime('19760518T235900Z').isoformat()
@@ -62,14 +63,13 @@ def string_to_datetime(string):
     """
 
     datetime_formats = {
-        # datetime example           format
-        '1976-05-18T23:59:00+05:00': '%Y-%m-%dT%H:%M:%S',
-        '19760518T235900+0500':      '%Y%m%dT%H%M%S%z',
-        '19760518T235900Z':          '%Y%m%dT%H%M%SZ',
-        '1976-05-18T23:59:00':       '%Y-%m-%dT%H:%M:%S',
-        '19760518T235900':           '%Y%m%dT%H%M%S',
-        '1976-05-18':                '%Y-%m-%d',
-        '19760518':                  '%Y%m%d',
+        # datetime example       format
+        '19760518T235900+0500':  '%Y%m%dT%H%M%S%z',
+        '19760518T235900Z':      '%Y%m%dT%H%M%SZ',
+        '1976-05-18T23:59:00':   '%Y-%m-%dT%H:%M:%S',
+        '19760518T235900':       '%Y%m%dT%H%M%S',
+        '1976-05-18':            '%Y-%m-%d',
+        '19760518':              '%Y%m%d',
     }
 
     m = re.match(r'^(\d{4})-?(\d{2})-?(\d{2})', string)
@@ -104,14 +104,10 @@ class TypedList(list):
         super(TypedList, self).append(item)
 
 
-# public enum SortDirection {
-#     ASC,
-#     DESC;
-# }
 class SortDirection(Enum):
     """
-    >>> str(SortDirection.DESC)
-    'DESC'
+    SortDirection.ASC
+
     >>> serialize_to_json(SortDirection.DESC)
     '"DESC"'
     """
@@ -123,15 +119,10 @@ class SortDirection(Enum):
         return self._name_
 
 
-# public enum FilterDataType {
-#     NUMBER,
-#     DATE,
-#     STRING
-# }
 class FilterDataType(Enum):
     """
-    >>> str(FilterDataType.NUMBER)
-    'NUMBER'
+    FilterDataType.NUMBER
+
     >>> serialize_to_json(FilterDataType.NUMBER)
     '"NUMBER"'
     """
@@ -144,20 +135,10 @@ class FilterDataType(Enum):
         return self._name_
 
 
-# public enum Operation {
-#     EQUALS,
-#     NOT_EQUALS,
-#     STARTS_WITH,
-#     NOT_STARTS_WITH,
-#     ALL_IS_LESS,
-#     ALL_IS_MORE,
-#     AT_LEAST_ONE_IS_LESS,
-#     AT_LEAST_ONE_IS_MORE
-# }
 class Operation(Enum):
     """
-    >>> str(Operation.EQUALS)
-    'EQUALS'
+    Operation.EQUALS
+
     >>> serialize_to_json(Operation.EQUALS)
     '"EQUALS"'
     """
@@ -175,79 +156,48 @@ class Operation(Enum):
         return self._name_
 
 
-# public class DateRangeFilterDto {
-#     public String key;
-#     public String from;
-#     public String to;
-#
-#     public DateRangeFilterDto() {
-#     }
-#
-#     public DateRangeFilterDto(String from, String to) {
-#         this.from = from;
-#         this.to = to;
-#     }
-#
-#     public DateRangeFilterDto(String key, String from, String to) {
-#         this.key = key;
-#         this.from = from;
-#         this.to = to;
-#     }
-# }
 class DateRangeFilterDto:
     """
-    >>> DateRangeFilterDto().key
-    ''
-    >>> DateRangeFilterDto('19760518', '19760519').from_
+    DateRangeFilterDto()
+    DateRangeFilterDto(String from, String to)
+    DateRangeFilterDto(String key, String from, String to)
+
+    >>> DateRangeFilterDto('19760518', '19760519').datetime_from
     datetime.datetime(1976, 5, 18, 0, 0)
-    >>> DateRangeFilterDto('19760518', '19760519').to
+    >>> DateRangeFilterDto('19760518', '19760519').datetime_to
     datetime.datetime(1976, 5, 19, 0, 0)
     >>> DateRangeFilterDto('key', '19760518', '19760519').key
     'key'
-    >>> DateRangeFilterDto('key', '19760518', '19760519').from_
+    >>> DateRangeFilterDto('key', '19760518', '19760519').datetime_from
     datetime.datetime(1976, 5, 18, 0, 0)
-    >>> DateRangeFilterDto('key', '19760518', '19760519').to
+    >>> DateRangeFilterDto('key', '19760518', '19760519').datetime_to
     datetime.datetime(1976, 5, 19, 0, 0)
     """
 
     key = ''
-    from_ = ''
-    to = ''
+    datetime_from = ''
+    datetime_to = ''
 
     def __init__(self, *args):
         if len(args) == 0:
             pass
         elif len(args) == 2:
-            self.from_ = string_to_datetime(args[0])
-            self.to =    string_to_datetime(args[1])
+            self.datetime_from = string_to_datetime(args[0])
+            self.datetime_to   = string_to_datetime(args[1])
         elif len(args) == 3:
             self.key =   args[0]
-            self.from_ = string_to_datetime(args[1])
-            self.to =    string_to_datetime(args[2])
+            self.datetime_from = string_to_datetime(args[1])
+            self.datetime_to   = string_to_datetime(args[2])
         else:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
 
 
-# public class DimensionSortKeyDto {
-#     public String dimension;
-#     public SortDirection direction = SortDirection.ASC;
-#
-#     public DimensionSortKeyDto() {
-#     }
-#
-#     public DimensionSortKeyDto(String dimension) {
-#         this(dimension, SortDirection.ASC);
-#     }
-#
-#     public DimensionSortKeyDto(String dimension, SortDirection direction) {
-#         this.dimension = dimension;
-#         this.direction = direction;
-#     }
-# }
 class DimensionSortKeyDto:
     """
-    >>> DimensionSortKeyDto().dimension
-    ''
+    DimensionSortKeyDto()
+    DimensionSortKeyDto(String dimension)
+    DimensionSortKeyDto(String dimension, SortDirection direction)
+
     >>> DimensionSortKeyDto('dimension').dimension
     'dimension'
     >>> DimensionSortKeyDto('dimension', SortDirection.DESC).direction
@@ -269,26 +219,12 @@ class DimensionSortKeyDto:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
 
 
-# public class MetricDto {
-#     public String metric;
-#     public Map<String, String> parameters = new HashMap<>();
-#
-#     public MetricDto() {
-#     }
-#
-#     public MetricDto(String metric) {
-#         this.metric = metric;
-#     }
-#
-#     public MetricDto AddParameter(String name, String value) {
-#         this.parameters.put(name, value);
-#         return this;
-#     }
-# }
 class MetricDto:
     """
-    >>> m = MetricDto(); m.metric
-    ''
+    MetricDto()
+    MetricDto(String metric)
+    .AddParameter(String name, String value)
+
     >>> m = MetricDto('abc'); m.metric
     'abc'
     >>> m = MetricDto(); m.AddParameter('a', 'b'); m.parameters
@@ -310,18 +246,11 @@ class MetricDto:
         self.parameters[name] = value
 
 
-# public class MetricSortKeyDto {
-#
-#     public MetricDto metric;
-#     public SortDirection direction = SortDirection.ASC;
-#
-#     public MetricSortKeyDto(MetricDto metric, SortDirection direction) {
-#         this.metric = metric;
-#         this.direction = direction;
-#     }
-# }
 class MetricSortKeyDto:
     """
+    MetricSortKeyDto()
+    MetricSortKeyDto(MetricDto metric, SortDirection direction)
+
     >>> MetricSortKeyDto(MetricDto('abc'), SortDirection.DESC).metric.metric
     'abc'
     >>> MetricSortKeyDto(MetricDto('abc'), SortDirection.DESC).direction
@@ -336,77 +265,54 @@ class MetricSortKeyDto:
         self.direction = direction
 
 
-# public class SortDto {
-#     public DimensionSortKeyDto[] dimensions;
-#     public MetricSortKeyDto metric;
-# }
 class SortDto:
+    """
+    SortDto()
+    """
     dimensions = TypedList(type(DimensionSortKeyDto()))
     metric = MetricSortKeyDto()
 
 
-# public class SimpleFilterDto {
-#     public String key;
-#     public boolean isMetric = false;
-#     public String[] values;
-#     public FilterDataType type;
-# }
 class SimpleFilterDto:
+    """
+    SimpleFilterDto()
+    """
     key = ''
     isMetric = False
     values = []
-    # TODO
-    # type = FilterDataType()
+
+    def __init__(self):
+        self.type = FilterDataType()
 
 
-# public class SingleKeyFilterDto {
-#     public String key;
-#     public Operation operation;
-#     public String[] values;
-#
-#     public SingleKeyFilterDto() {
-#     }
-#
-#     public SingleKeyFilterDto(String key, Operation operation, String[] values) {
-#         this.key = key;
-#         this.operation = operation;
-#         this.values = values;
-#     }
-# }
 class SingleKeyFilterDto:
     """
+    SingleKeyFilterDto()
+    SingleKeyFilterDto(String key, Operation operation, String[] values)
+
     >>> SingleKeyFilterDto().operation
     <Operation.EQUALS: 0>
     >>> SingleKeyFilterDto('key', Operation.EQUALS, ['a', 'b']).values
     ['a', 'b']
     """
-
-    key = ''
-    # TODO
-    # operation = Operation()
-    values = []
-
     def __init__(self, *args):
         if len(args) == 0:
-            pass
+            self.key = ''
+            self.operation = Operation.EQUALS
+            self.values = []
         elif len(args) == 3:
-            self.key = args[0]
+            self.key       = args[0]
             self.operation = args[1]
-            self.values = args[2]
+            self.values    = args[2]
         else:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
 
 
-# public class FilterDto {
-#     public List<DateRangeFilterDto> dateRanges;
-#     public List<SingleKeyFilterDto> singleKeys;
-#
-#     public FilterDto () {
-#     }
-# }
 class FilterDto:
     """
-    >>> f = FilterDto(); f.dateRanges.append(DateRangeFilterDto('19760518','19760519')); f.dateRanges[0].to
+    FilterDto()
+
+    >>> f = FilterDto(); f.dateRanges.append(DateRangeFilterDto('19760518','19760519')); f.dateRanges[0].datetime_to
     datetime.datetime(1976, 5, 19, 0, 0)
     """
 
@@ -414,48 +320,21 @@ class FilterDto:
     singleKeys = TypedList(type(SingleKeyFilterDto()))
 
 
-# public class ReportDataDto {
-#     public String[] columnHeaders;
-#     public List<Object[]> rows;
-#
-#     public ReportDataDto() {
-#     }
-# }
 class ReportDataDto:
+    """
+    ReportDataDto()
+    """
     columnHeaders = []
     rows = []
 
 
-# public class GetDataRequest {
-#     private String requestID;
-#     public Map<String, String> consumerInfo;
-#     public String scopeName;
-#     public String graphName;
-#     public String[] dimensions;
-#     public MetricDto[] metrics;
-#     public FilterDto filters;
-#     public SortDto sortings;
-#
-#     public GetDataRequest() {
-#         this.consumerInfo = new HashMap<>();
-#     }
-#
-#     public GetDataRequest(String requestID, Map<String, String> consumerInfo) {
-#         this.requestID = requestID;
-#         this.consumerInfo = consumerInfo;
-#     }
-#
-#     public String getRequestID() {
-#         if (this.requestID == null)
-#             this.requestID = UUID.randomUUID().toString();
-#         return this.requestID;
-#     }
-#
-#     public void setRequestID(String value) {
-#         this.requestID = value;
-#     }
-# }
 class GetDataRequest:
+    """
+    GetDataRequest()
+    GetDataRequest(String requestID, Map<String, String> consumerInfo)
+    .getRequestID()
+    .setRequestID(String value)
+    """
     requestID = ''
     consumerInfo = {}
     scopeName = ''
@@ -469,7 +348,7 @@ class GetDataRequest:
         if len(args) == 0:
             pass
         elif len(args) == 2:
-            self.requestID = args[0]
+            self.requestID    = args[0]
             self.consumerInfo = args[1]
         else:
             raise ValueError("Bad arguments number for {}".format(self.__class__))
@@ -483,23 +362,11 @@ class GetDataRequest:
         self.requestID = value
 
 
-# public class GetDataResponse  {
-#
-#     public String requestID;
-#     public ReportDataDto reportData;
-#     public Integer totalRows;
-#
-#     public GetDataResponse(String requestID) {
-#         this.requestID = requestID;
-#     }
-#
-#     public GetDataResponse(String requestID, ReportDataDto reportData, int totalRows) {
-#         this.requestID = requestID;
-#         this.reportData = reportData;
-#         this.totalRows = totalRows;
-#     }
-# }
 class GetDataResponse:
+    """
+    GetDataResponse(String requestID)
+    GetDataResponse(String requestID, ReportDataDto reportData, int totalRows)
+    """
     requestID = ''
     reportData = ReportDataDto()
     totalRows = 0
